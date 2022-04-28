@@ -10,13 +10,12 @@ import cv2
 import numpy as np
 import os
 import time
-
+import socket
 import threading
 
 import gestureCNN as myNN
 
 minValue = 70
-
 x0 = 400
 y0 = 200
 height = 200
@@ -189,6 +188,14 @@ def bkgrndSubMask(frame, x0, y0, width, height, framecount, plot):
 	
 #%%
 def Main():
+
+    global SocketThread
+
+    SocketThread = True
+
+    socketthread = threading.Thread(target=SocketInitiation)
+    socketthread.start()
+
     global guessGesture, visualize, mod, binaryMode, bkgrndSubMode, mask, takebkgrndSubMask, x0, y0, width, height, saveImg, gestname, path
     quietMode = False
     
@@ -244,7 +251,7 @@ def Main():
         
         frame = cv2.flip(frame, 3)
         frame = cv2.resize(frame, (640,480))
-                      
+                    
         if ret == True:
             if bkgrndSubMode == True:
                 roi = bkgrndSubMask(frame, x0, y0, width, height, framecount, plot)
@@ -283,6 +290,7 @@ def Main():
             if guessGesture == True:
                 plot = np.zeros((512,512,3), np.uint8)
                 plot = myNN.update(plot)
+               # print(plot)
             
             cv2.imshow('Gesture Probability',plot)
             #plot = np.zeros((512,512,3), np.uint8)
@@ -292,6 +300,7 @@ def Main():
         
         ## Use Esc key to close the program
         if key == 27:
+            SocketThread = False
             break
         
         ## Use b key to toggle between binary threshold or skinmask based filters
@@ -358,12 +367,28 @@ def Main():
             
             path = "./"+gestname+"/"
         
+        # socketClientConnection,socketClientAddress = sock.accept()
+        # print(socketClientAddress) 
         #elif key != 255:
         #    print key
 
     #Realse & destroy
     cap.release()
     cv2.destroyAllWindows()
+
+
+def SocketInitiation():
+    socketConnection = 'localhost',5000
+    sock = socket.socket()
+    sock.bind(socketConnection)
+    sock.listen()
+    print("Socket listening on: %s" % (socketConnection,))
+    while(SocketThread):
+        (socketForClient, clientIP) = sock.accept();
+        print('Awaiting connection: %s', clientIP)
+        time.sleep(1)
+
+
 
 if __name__ == "__main__":
     Main()

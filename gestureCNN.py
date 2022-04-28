@@ -5,7 +5,6 @@ Created on Thu Apr  6 01:01:43 2017
 
 @author: abhisheksingh
 """
-
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Conv2D, MaxPooling2D, ZeroPadding2D
@@ -57,8 +56,10 @@ batch_size = 32
 
 ## Number of output classes (change it accordingly)
 ## eg: In my case I wanted to predict 4 types of gestures (Ok, Peace, Punch, Stop)
+## eg: In my case I wanted to predict 4 types of gestures (gestc,Ok, Peace, Punch, Stop)
 ## NOTE: If you change this then dont forget to change Labels accordingly
-nb_classes = 5
+#nb_classes = 5y
+nb_classes = 2
 
 # Number of epochs to train (change it accordingly)
 nb_epoch = 15  #25
@@ -76,12 +77,14 @@ path = "./"
 path1 = "./gestures"    #path of folder of images
 
 ## Path2 is the folder which is fed in to training model
-path2 = './imgfolder_b'
+#path2 = './gestc'
+path2 = './imgfolder_a'
 
 WeightFileName = []
 
 # outputs
-output = ["OK", "NOTHING","PEACE", "PUNCH", "STOP"]
+output = ["NOTHING","STOP"]
+#output = ["OK", "NOTHING","PEACE", "PUNCH", "STOP", "gestc"]
 #output = ["PEACE", "STOP", "THUMBSDOWN", "THUMBSUP"]
 
 jsonarray = {}
@@ -233,7 +236,8 @@ def guessGesture(model, img):
     prob  = d[guess]
 
     if prob > 60.0:
-        #print(guess + "  Probability: ", prob)
+        SendDataToUnreal(guess,prob)
+        print(guess + "  Probability: ", prob)
 
         #Enable this to save the predictions in a json file,
         #Which can be read by plotter app to plot bar graph
@@ -246,8 +250,11 @@ def guessGesture(model, img):
         return output.index(guess)
 
     else:
-        # Lets return index 1 for 'Nothing' 
-        return 1
+        # Lets return index 2 for 'Nothing' 
+        return 0
+
+def SendDataToUnreal(guess,prob):
+    return 0
 
 #%%
 def initializers():
